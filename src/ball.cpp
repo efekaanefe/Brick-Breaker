@@ -12,9 +12,9 @@ Ball::Ball()
 }
 
 
-void Ball::Update()
+void Ball::Update(Player player, Grid grid)
 {
-    CollisionDetector();
+    CollisionDetector(player, grid);
     Draw();
     Move();
 }
@@ -34,7 +34,7 @@ void Ball::Move()
     pos.y += velocity.y * deltaTime;
 }
 
-void Ball::CollisionDetector() // and updater
+void Ball::CollisionDetector(Player player, Grid grid) // and updater
 {
     // walls
     if ((pos.x >= (screenWidth - radius)) || (pos.x <= radius)) {
@@ -43,4 +43,13 @@ void Ball::CollisionDetector() // and updater
     if ((pos.y >= (screenHeight - radius)) || (pos.y <= radius)) {
         directionAngle = 360 - directionAngle;
     }
+
+    if (pos.y >= (player.pos.y-radius)){
+        directionAngle = 360 - directionAngle; // TODO: make this more fun
+    }
+
+    // TODO: add collision with blocks
+
+
+
 }

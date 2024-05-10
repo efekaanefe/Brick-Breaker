@@ -1,6 +1,8 @@
 #pragma once
 #include "raylib.h"
 #include "constants.h"
+#include "player.h"
+#include "grid.h"
 
 
 class Ball
@@ -10,11 +12,11 @@ class Ball
         Vector2 pos;
         float directionAngle, speed;
         int radius;
-        void Update();
+        void Update(Player player, Grid grid);
 
     private:
+        void CollisionDetector(Player player, Grid grid);
         void Draw();
         void Move();
-        void CollisionDetector();
         Color color;
 };

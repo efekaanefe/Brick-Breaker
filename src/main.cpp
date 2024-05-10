@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "player.h"
 #include "ball.h"
+#include "grid.h"
 
 #include<string>  
 
@@ -11,7 +12,7 @@ int main()
     SetTargetFPS(75);              
     Player player = Player();
     Ball ball = Ball();
-    
+    Grid grid = Grid();
     // Main game loop
     while (!WindowShouldClose())  
     {
@@ -21,7 +22,8 @@ int main()
             DrawFPS(10, 10);
             
             player.Update();
-            ball.Update();
+            ball.Update(player);
+            grid.Update();
                         
         EndDrawing();
     }

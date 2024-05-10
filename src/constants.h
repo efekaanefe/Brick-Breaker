@@ -15,5 +15,12 @@ const int ballRadius = 10;
 const int ballSpeed = 500;
 const Color ballColor = WHITE;
 
+const int startX = 50;
+const int startY = 50;
+const int numRows = 10; 
+const int numCols = 10;
+const int blockWidth = (screenWidth-startX*2)/numCols;
+const int blockHeight = 25;
 
-#endif CONSTANTS_H
+
+#endif
