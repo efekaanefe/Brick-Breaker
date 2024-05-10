@@ -15,5 +15,6 @@ class Ball
     private:
         void Draw();
         void Move();
+        void CollisionDetector();
         Color color;
 };

@@ -1,10 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
-
 #pragma once
 #include "raylib.h"
-
-
 
 const int screenWidth = 1600;
 const int screenHeight = 900;
