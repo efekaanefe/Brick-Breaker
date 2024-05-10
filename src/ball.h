@@ -2,13 +2,15 @@
 #include "raylib.h"
 #include "constants.h"
 
-class Player
+
+class Ball
 {
-    public: 
-        Player();
-        void Update();
+    public:
+        Ball();
         Vector2 pos;
-        float width, height;
+        float directionAngle, speed;
+        int radius;
+        void Update();
 
     private:
         void Draw();
