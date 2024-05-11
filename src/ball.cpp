@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "math.h"
 
+
 Ball::Ball()
 {
     pos = {100, 100};
@@ -53,14 +54,14 @@ void Ball::CollisionDetector(Player player, Grid grid) // and updater
     for (int row = 0; row < numRows; ++row) {
         for (int col = 0; col < numCols; ++col) {
 
-            Block block = grid.grid[row][col];
+            Block block = grid.GetBlock(row, col);
             int collisionType = block.handleCollision(pos, radius);
 
             if (collisionType == 1){
                 directionAngle = 360 - directionAngle;
             }
             else if (collisionType == 2){
-                
+                directionAngle = 180 - directionAngle;
             }
         }
     }

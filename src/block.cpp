@@ -1,11 +1,10 @@
-#include "Block.h"
+#include "block.h"
 #include "constants.h"
 
-Block::Block(Vector2 pos, Color colorGiven, int life){
-    lifeRemaining = life;
-    position = pos;
-    color = colorGiven;
-}
+
+Block::Block() : lifeRemaining(0), position({0, 0}), color(BLANK) {}
+Block::Block(Vector2 pos, Color colorGiven, int life) : lifeRemaining(life), position(pos), color(colorGiven) {}
+
 
 int Block::handleCollision(Vector2 ballPosition, float ballRadius) {
     Rectangle blockRect = { position.x, position.y, blockWidth, blockHeight};
@@ -33,7 +32,7 @@ int Block::handleCollision(Vector2 ballPosition, float ballRadius) {
     return 0; // No collision
 }
 
-void Block::draw() const {
+void Block::Draw() {
     DrawRectangle(position.x, position.y, blockWidth, blockHeight, GRAY);
 }
 

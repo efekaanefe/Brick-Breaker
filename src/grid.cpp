@@ -1,8 +1,9 @@
 #include "grid.h"
 // #include <vector>
 #include "constants.h"
-#include <random>
 #include "block.h"
+#include <random>
+
 
 Grid::Grid()
 {
@@ -20,7 +21,7 @@ void Grid::Draw()
     for (int row = 0; row < numRows; ++row) {
         for (int col = 0; col < numCols; ++col) {
             Block block = GetBlock(row, col);
-            block.draw();
+            block.Draw();
         }
     }
 }
@@ -40,7 +41,7 @@ void Grid::Initialize()
             for (int col = 0; col < numCols; col++)
             { 
                 Color color;
-                int value = GetValue(row, col);
+                int value = dist(gen);
                 
                 if (value == 0) { color = GRAY; }
                 else if (value == 1){ color = PURPLE; }

@@ -1,15 +1,18 @@
 #pragma once
-
 #include "raylib.h"
 
-class Block {
-public:
-    Block(Vector2 pos, Color color, int life);
-    int handleCollision(Vector2 ballPosition, float ballRadius);
-    void draw() const;
 
-private:
-    int lifeRemaining, blockSize;
-    Vector2 position;
-    Color color;
+class Block {
+
+    private:
+        int lifeRemaining;
+        Vector2 position;
+        Color color;
+
+    public:
+        Block();
+        Block(Vector2 pos, Color colorGiven, int life);
+        
+        int handleCollision(Vector2 ballPosition, float ballRadius);
+        void Draw();
 };
