@@ -2,11 +2,12 @@
 #include "block.h"
 #include "constants.h"
 #include "math.h"
+#include <cstdio>
 
 
 Ball::Ball()
 {
-    pos = {100, 100};
+    pos = {screenWidth/2, screenHeight*0.8};
     directionAngle = 150.f;
     speed = ballSpeed;
     color = ballColor;
@@ -59,9 +60,13 @@ void Ball::CollisionDetector(Player player, Grid grid) // and updater
 
             if (collisionType == 1){
                 directionAngle = 360 - directionAngle;
+                printf("%d", collisionType);
+                return;
             }
             else if (collisionType == 2){
                 directionAngle = 180 - directionAngle;
+                printf("%d", collisionType);
+                return;
             }
         }
     }

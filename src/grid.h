@@ -14,6 +14,6 @@ class Grid{
     private:
         void Draw();
         void Initialize();
-        void SetBlock(int row, int col, int lifeRemaining, Color color);
+        void SetRandomBlock(int row, int col);
         void SetValue(int row, int col, int value);
 };

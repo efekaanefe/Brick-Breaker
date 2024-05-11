@@ -1,6 +1,6 @@
 #include "block.h"
 #include "constants.h"
-
+#include <cstdio>
 
 Block::Block() : lifeRemaining(0), position({0, 0}), color(BLANK) {}
 Block::Block(Vector2 pos, Color colorGiven, int life) : lifeRemaining(life), position(pos), color(colorGiven) {}
@@ -20,15 +20,19 @@ int Block::handleCollision(Vector2 ballPosition, float ballRadius) {
     bool collidedTop = ballBottom > blockRect.y && ballBottom < ballRect.y + ballRect.height && ballLeft < ballRect.x + ballRect.width && ballRight > ballRect.x;
     bool collidedBottom = ballTop < blockRect.y + blockRect.height && ballTop > ballRect.y && ballLeft < ballRect.x + ballRect.width && ballRight > ballRect.x;
 
+    // DEBUG
+    printf("%d%d%d%d\r",collidedLeft, collidedRight, collidedTop, collidedBottom);
+    fflush(stdout);
+
+    return 0;
     if (collidedLeft || collidedRight) {
         lifeRemaining--;
         return 1; 
     }
-    else if (collidedBottom || collidedTop){
+    if (collidedBottom || collidedTop){
         lifeRemaining--;
         return 2;
     }
-
     return 0; // No collision
 }
 
