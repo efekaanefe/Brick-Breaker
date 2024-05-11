@@ -1,4 +1,5 @@
 #include "ball.h"
+#include "block.h"
 #include "constants.h"
 #include "math.h"
 
@@ -49,7 +50,18 @@ void Ball::CollisionDetector(Player player, Grid grid) // and updater
     }
 
     // TODO: add collision with blocks
+    for (int row = 0; row < numRows; ++row) {
+        for (int col = 0; col < numCols; ++col) {
 
+            Block block = grid.grid[row][col];
+            int collisionType = block.handleCollision(pos, radius);
 
-
+            if (collisionType == 1){
+                directionAngle = 360 - directionAngle;
+            }
+            else if (collisionType == 2){
+                
+            }
+        }
+    }
 }

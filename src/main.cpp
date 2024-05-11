@@ -22,7 +22,7 @@ int main()
             DrawFPS(10, 10);
             
             player.Update();
-            ball.Update(player);
+            ball.Update(player, grid);
             grid.Update();
                         
         EndDrawing();
