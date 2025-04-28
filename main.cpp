@@ -15,20 +15,22 @@ const Color playerColor = DARKGRAY;
 
 const int ballRadius = 10;
 const int ballSpeed = 500;
+const float ballSpeedMultiplier = 1.05;
 const Color ballColor = WHITE;
 
-const int startX = 50;
-const int startY = 50;
-const int numRows = 5; // Reduced for better gameplay
-const int numCols = 8; // Reduced for better gameplay
+const int startX = 20;
+const int startY = 20;
+const int numRows = 5; 
+const int numCols = 8; 
 const int blockWidth = (screenWidth - startX * 2) / numCols;
 const int blockHeight = 25;
 
-// Forward declarations - Good practice for larger projects, helps with organization
+// Forward declarations 
 class Ball;
 class Block;
 class Grid;
 class Player;
+class Game;
 
 class Ball {
 public:
@@ -90,7 +92,6 @@ private:
     void Draw();
     void Initialize();
     void SetRandomBlock(int row, int col);
-    // void SetValue(int row, int col, int value); // Not used, removed.
 };
 
 class Player {
@@ -99,6 +100,8 @@ public:
     void Update();
     Vector2 pos;
     float width, height;
+    bool is_alive;
+    int score;
 
 private:
     void Draw();
@@ -106,18 +109,32 @@ private:
     Color color;
 };
 
+class Game {
+public: 
+    Game();
+    Player player;
+    void DrawUI();
+    void Update();
+
+private:
+    Ball ball;
+    Grid grid;    
+    
+
+};
+    
 Ball::Ball()
 {
-    pos = { screenWidth / 2, screenHeight * 0.8f }; // Use float literals for consistency
-    directionAngle = 150.0f;
+    pos = { screenWidth / 2, screenHeight * 0.8f }; 
+    directionAngle = -150.0f;
     speed = ballSpeed;
     color = ballColor;
     radius = ballRadius;
 }
 
-void Ball::Update(Player& player, Grid& grid) // Pass by reference
+void Ball::Update(Player& player, Grid& grid) 
 {
-    CollisionDetector(player, grid); // Pass by reference
+    CollisionDetector(player, grid); 
     Move();
     Draw();
 }
@@ -167,20 +184,19 @@ void Ball::CollisionDetector(Player& player, Grid& grid) // Pass by reference
         directionAngle = 360.0f - directionAngle;
         bounced = true;
     }
-
-    // NOTE: Bottom wall collision (loss condition) is typically handled outside this function.
+    
+    // Bottom Wall
+    if (pos.y  >= screenHeight - radius) {
+        player.is_alive = false;
+    }
 
     // Normalize angle after potential wall bounce
     directionAngle = NormalizeAngle(directionAngle);
 
     // --- Player Paddle Collision ---
-    // Only check player collision if no wall bounce occurred this frame (optional optimization)
     if (!bounced) {
         Rectangle playerRect = {player.pos.x, player.pos.y, player.width, player.height};
         if (CheckCollisionCircleRec(pos, radius, playerRect)) {
-
-            // Simple vertical bounce first (often good enough)
-            // directionAngle = 360.0f - directionAngle;
 
             // --- More Controlled Paddle Bounce ---
             // Calculate normalized horizontal distance from paddle center (-1 to 1)
@@ -194,14 +210,10 @@ void Ball::CollisionDetector(Player& player, Grid& grid) // Pass by reference
             const float MAX_PADDLE_BOUNCE_ANGLE_DEG = 60.0f; // Adjust as needed
 
             // Calculate the outgoing angle based on hit position.
-            // 270 degrees is straight up. We subtract the influence.
-            // Hit left (-1) -> 270 - (-1 * 60) = 330 degrees (up-left)
-            // Hit center (0) -> 270 - (0 * 60) = 270 degrees (up)
-            // Hit right (1) -> 270 - (1 * 60) = 210 degrees (up-right)
             directionAngle = 270.0f - relativeIntersectX * MAX_PADDLE_BOUNCE_ANGLE_DEG;
 
             // Ensure ball is slightly above the paddle to prevent immediate re-collision
-            pos.y = player.pos.y - radius - 0.1f; // Small offset
+            pos.y = player.pos.y - radius - 0.1f; 
 
             bounced = true; // Mark that a bounce happened
         }
@@ -222,6 +234,9 @@ void Ball::CollisionDetector(Player& player, Grid& grid) // Pass by reference
                 if (block.isAlive()) { // Only check alive blocks.
                     Rectangle blockRect = block.GetRect();
                     if (CheckCollisionCircleRec(pos, radius, blockRect)) {
+                        
+                        player.score = player.score + 1;
+                        speed = speed * ballSpeedMultiplier;
 
                         // --- Improved Block Collision Side Detection ---
                         // Calculate vector from block center to ball center
@@ -235,7 +250,7 @@ void Ball::CollisionDetector(Player& player, Grid& grid) // Pass by reference
                         float intersectY = (blockRect.height / 2.0f + radius) - fabsf(dy);
 
                         // Determine primary collision axis based on smallest overlap
-                        if (intersectX > 0 && intersectY > 0) { // Ensure overlap exists
+                        if (intersectX > 0 && intersectY > 0) { 
                             if (intersectX < intersectY) {
                                 // Side collision (horizontal reflection)
                                 directionAngle = 180.0f - directionAngle;
@@ -248,28 +263,18 @@ void Ball::CollisionDetector(Player& player, Grid& grid) // Pass by reference
                                 pos.y += (dy > 0 ? intersectY : -intersectY);
                             }
                         } else {
-                            // Fallback (e.g., exact corner hit or calculation issue) - simple vertical bounce
-                            // This case might need more refinement if corners are problematic
                              directionAngle = 360.0f - directionAngle;
                         }
 
 
-                        // Normalize angle after block bounce
                         directionAngle = NormalizeAngle(directionAngle);
 
                         // --- Handle Block State ---
-                        // Need a mutable reference/pointer if we modify the block in the grid
-                        grid.grid[row][col].decreaseLife(); // Modify the block in the actual grid
-
-                        // If block is destroyed after hit, handle it (e.g., replace)
+                        grid.grid[row][col].decreaseLife();
                         if (!grid.grid[row][col].isAlive()) {
-                             // Example: Replace with a default/dead block
-                             // grid.grid[row][col] = Block(); // Assuming default constructor makes a dead block
-                             // Or maybe set a flag: grid.grid[row][col].setDead();
-                             // Add score etc. here
+
                         }
 
-                        // Important: Only handle one block collision per frame!
                         return;
                     }
                 }
@@ -282,10 +287,6 @@ void Ball::CollisionDetector(Player& player, Grid& grid) // Pass by reference
 Block::Block() : lifeRemaining(0), position({ 0, 0 }), color(BLANK) {}
 Block::Block(Vector2 pos, Color colorGiven, int life) : lifeRemaining(life), position(pos), color(colorGiven) {}
 
-int Block::handleCollision(Vector2 ballPosition, float ballRadius) {
-     // This function is not needed anymore
-    return 0;
-}
 
 void Block::Draw() {
     if (lifeRemaining > 0) {
@@ -298,7 +299,7 @@ Grid::Grid()
     Initialize();
 }
 
-void Grid::Update(Ball& ball) // Pass by reference,
+void Grid::Update(Ball& ball) 
 {
     Draw();
 }
@@ -337,13 +338,14 @@ void Grid::SetRandomBlock(int row, int col)
     pos.x = startX + col * (blockWidth + 1);
     pos.y = startY + row * (blockHeight + 1);
 
-    // Seed the random number generator (better approach)
+    // Seed the random number generator
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dist(1, 5); // Generate numbers between 1 and 5
+    std::uniform_int_distribution<int> dist(1, 5); 
 
     Color color;
-    int value = dist(gen);
+    //int value = dist(gen);
+    int value = 42;
 
     if (value == 1) { color = PURPLE; }
     else if (value == 2) { color = RED; }
@@ -363,6 +365,8 @@ Player::Player()
     pos = { screenWidth / 2 - 40, screenHeight - 40 };
     width = playerWidth; height = playerHeight;
     color = playerColor;
+    is_alive = true;
+    score = 0;
 }
 
 void Player::Update()
@@ -371,7 +375,8 @@ void Player::Update()
     Draw();
 }
 
-void Player::Draw() {
+void Player::Draw() 
+{
     Rectangle rect = { pos.x, pos.y, width, height };
     DrawRectangleRec(rect, color);
 }
@@ -385,28 +390,94 @@ void Player::Move()
     if (pos.x + width > screenWidth) pos.x = screenWidth - width;
 }
 
-int main(void)
+Game::Game()
 {
-    InitWindow(screenWidth, screenHeight, "Breakout Game");
-    SetTargetFPS(75);
+    player = Player();
+    ball = Ball();
+    grid = Grid();
+}
 
-    Ball ball;
-    Player player;
-    Grid grid;
+void Game::Update()
+{
+    ball.Update(player, grid);
+    player.Update();
+    grid.Update(ball);
+    
+    DrawUI();
+}
 
-    while (!WindowShouldClose())
-    {
+void Game::DrawUI() {
+    std::string scoreText = "Your Score: " + std::to_string(player.score);
+    int scoreTextWidth = MeasureText(scoreText.c_str(), 20);
+    DrawText(scoreText.c_str(), 10, screenHeight - 25, 20, WHITE);
+}
+
+bool RestartScreenHandler(int finalScore) {
+
+    const char* gameOverText = "GAME OVER!";
+    std::string scoreText = "Your Score: " + std::to_string(finalScore);
+    const char* restartText = "Press SPACE to Restart";
+
+    // Calculate text widths for centering (optional, but looks nicer)
+    int gameOverTextWidth = MeasureText(gameOverText, 40);
+    int scoreTextWidth = MeasureText(scoreText.c_str(), 20);
+    int restartTextWidth = MeasureText(restartText, 20);
+
+    while (!WindowShouldClose()) {
+        // --- Input ---
+        if (IsKeyPressed(KEY_SPACE)) { // Use IsKeyPressed for single trigger
+            return true; // Signal to restart the game
+        }
+
+        // --- Drawing ---
+        BeginDrawing();
+        ClearBackground(backgroundColor); // Use your desired background
+
+        // Draw the texts centered
+        DrawText(gameOverText, screenWidth / 2 - gameOverTextWidth / 2, screenHeight / 2 - 60, 40, RED);
+        DrawText(scoreText.c_str(), screenWidth / 2 - scoreTextWidth / 2, screenHeight / 2, 20, DARKGRAY);
+        DrawText(restartText, screenWidth / 2 - restartTextWidth / 2, screenHeight / 2 + 40, 20, DARKGRAY);
+
+        EndDrawing();
+    }
+
+    // If the loop exits because WindowShouldClose() is true
+    return false; // Signal that the user closed the window
+}
+
+
+int main(void) {
+    InitWindow(screenWidth, screenHeight, "Brick Breaker");
+    SetTargetFPS(75); // Or your desired FPS
+
+    Game game = Game(); // Initial game state
+    bool shouldExit = false; // Flag to control exiting the main loop
+
+    while (!WindowShouldClose() && !shouldExit) { // Check flags
+    
         BeginDrawing();
         ClearBackground(backgroundColor);
 
-        ball.Update(player, grid); // Pass by reference
-        player.Update();
-        grid.Update(ball); // Pass ball to grid
+        // --- Update ---
+        if (game.player.is_alive) {
+            game.Update(); 
+        }
+
+        // --- Check Game Over Condition ---
+        if (!game.player.is_alive) {
+
+            bool wantsRestart = RestartScreenHandler(game.player.score);
+
+            if (wantsRestart) {
+                game = Game();
+            } else {
+                shouldExit = true; 
+            }
+        }
 
         EndDrawing();
     }
 
     CloseWindow();
-
     return 0;
 }
